@@ -2,7 +2,6 @@
 Helper functions
 """
 import os
-import pandas as pd
 import random
 from video_annotator_generic.config import VIDEOS, ANNOTATED, USERS, DATABASE
 
