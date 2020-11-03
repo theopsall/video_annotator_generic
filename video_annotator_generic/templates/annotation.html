@@ -1,0 +1,63 @@
+{% extends "layouts.html" %}
+{% block heading %}
+<script>
+var vid = document.getElementById("myVideo");
+
+function getCurTime() {
+  return vid.currentTime;
+}
+
+function getLength() {
+  return vid.length;
+}
+function proceed(){
+    if (getCurTime() - getLength() <= 0){
+        console.log()
+    }
+}
+
+</script>
+<div class="navbar-header">
+                    <a class="navbar-brand" href="{{ url_for('profile') }}" >Welcome</a>
+                </div>
+                <ul class="nav navbar-nav">
+                    <li><p class="navbar-text" >{{username}}</li>
+                    <li><a href="{{ url_for('annotate')}}"> Annotate</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ url_for('logout')}}" >Logout</a></li>
+                </ul>
+            </div>
+{% endblock %}
+{% block content %}
+<h2>Annotating Video</h2>
+<p>Video Name: {{filename.split('/')[1]}}</p>
+<div class="container">
+    <div class="row" >
+        <div classs="col">
+            <video id="video" width="640" height="480" controls>
+                <source src={{ url_for("static", filename=filename) }} type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+    </div>
+<div class="row">
+            <form name='class-select' method="post"  action="{{ url_for('finish') }}" >
+                <div class="col col-lg-4">
+                  <label for="labels">Choose Label:</label>
+                      <select name="labels" id="labels">
+                          {% for key in classes %}
+                            <option value="{{key}}">{{key}}</option>
+                          {% endfor %}
+                      </select>
+                </div>
+                <div class="col col-lg-4">
+                    <button type="submit" class="btn btn-primary" >Finish Annotation</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <script type="text/javascript" src={{ url_for("static", filename="refresh.js") }} ></script>
+{% endblock %}
