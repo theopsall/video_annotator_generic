@@ -8,7 +8,7 @@ DATABASE = os.path.join(PATH, 'annotations_database.txt')
 
 CLASSES = {
     "Static": "A static camera is locked down on a tripod or pedestal and remains still. It is commonly used in dialogues.",
-    "Vertical": "Vertical movement of the camera lens while the camera remains locked on a tripod. It is like tilting your head up/down",
+    "Vertical_movement": "Vertical movement of the camera lens while the camera remains locked on a tripod. It is like tilting your head up/down",
     "Tilt": "Moving the entire camera up or down without moving its lens. Tilting up is like moving up your entire body from a sitting position.",
     "Panoramic": "Lateral movement of the camera lens while the camera remains locked down on its tripod or pedestal. It is like moving your head from one side to another.",
     "Panoramic_lateral": "The camera follows the action moving parallel to characters (crabbing)",
@@ -22,7 +22,7 @@ CLASSES = {
     "Handled": "The camera moves throughout the filming set while the camera operator physically holds it. These camera shots are shaky and create a hectic feeling.",
     "Car_front_windshield": "Front windshield shot",
     "Car_side_mirror": "Side mirror shot",
-    "Not_applicable": "The available labels do not describe the shot adequately."
+    "N/A": "The available labels do not describe the shot adequately."
 }
 
 if __name__ == "__main__":
