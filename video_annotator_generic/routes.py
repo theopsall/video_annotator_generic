@@ -1,11 +1,9 @@
 import os
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, session
 from video_annotator_generic import app
 from video_annotator_generic import utils
-from video_annotator_generic.user import User
 from video_annotator_generic.config import CLASSES
 
-user = User()
 
 
 @app.route('/')
@@ -24,16 +22,17 @@ def home():
 @app.route('/annotate', methods=['GET', 'POST'])
 def annotate():
 
-    if user.get_email() is not None:
-
-        if user.get_total_videos() > user.get_annotated():
-            user.set_video()
+    if "username" in session:
+        if utils.get_videos() > utils.annotated(session['username']):
+            diff = utils.get_difference(session['username'])
+            video = utils.get_random_video(diff)
+            session['video'] = video
 
             return render_template('annotation.html',
                                    title="Video Annotator Tool",
-                                   username=user.get_email(),
+                                   username=session['username'],
                                    classes=CLASSES,
-                                   filename='Videos' + os.sep + user.get_video())
+                                   filename='Videos' + os.sep + session['video'])
         else:
 
             return redirect("/profile")
@@ -45,51 +44,59 @@ def annotate():
 def finish():
     if request.method == 'POST':
         # save annotations
-        user.add_annotations(request.form['labels'])
-        message = 'Congrats you have successfully Annotated {0}'.format(user.get_video())
+        annotations = (request.form['labels'])
+        message = 'Congrats you have successfully Annotated {0}'.format(session["username"])
 
-        user.save_annotations()
+        utils.add_annotation(session['username'], session['video'], annotations)
+        utils.add_video(session['username'], session['video'])
+
+        annotations = []
+        session.pop('video', None)
+
 
         return render_template('profile.html',
-                               title="Annotator's Profile",
-                               username=user.get_email(),
-                               num_videos=user.get_total_videos(),
-                               already_annotated=user.get_annotated(),message = message)
+                                title="Annotator's Profile",
+                                username=session["username"],
+                                num_videos=utils.num_videos(),
+                                already_annotated=utils.num_annotated(session["username"]),
+                                message = message)
     else:
-        message = 'Video {0} failed to be annotated'.format(user.get_video())
+        message = 'Video {0} failed to be annotated'.format()
         return render_template('profile.html',
-                               title="Annotator's Profile",
-                               username=user.get_email(),
-                               num_videos=user.get_total_videos(),
-                               already_annotated=user.get_annotated(),
-                               message=message)
+                                title="Annotator's Profile",
+                                username=session["username"],
+                                num_videos=utils.num_videos(),
+                                already_annotated=utils.num_annotated(session["username"]),
+                                message = message)
+
 
 
 @app.route('/profile', methods=['POST', 'GET'])
 def profile():
-    if user.get_email() is not None:
-        message = None
+    if 'username' in session:
         return render_template('profile.html',
-                               title="Annotator's Profile",
-                               username=user.get_email(),
-                               num_videos=user.get_total_videos(),
-                               already_annotated=user.get_annotated(),
-                               message=message)
+                                title="Annotator's Profile",
+                                username=session["username"],
+                                num_videos=utils.num_videos(),
+                                already_annotated=utils.num_annotated(session["username"]))
+       
     return render_template("index.html", title='Home VAT')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
     error = None
     if request.method == "POST":
         email = request.form['email']
         if email in utils.get_users():
-            user.login(email)
+            session["username"] = email
+            print(session)
             return render_template('profile.html',
                                    title="Annotator's Profile",
-                                   username=user.get_email(),
-                                   num_videos=user.get_total_videos(),
-                                   already_annotated=user.get_annotated())
+                                   username=email,
+                                   num_videos=utils.num_videos(),
+                                   already_annotated=utils.num_annotated(email))
         else:
             error = "User with email {} does not exist. Please check your email or Sign Up".format(email)
             return render_template("login.html", title="Sign in to VAT", error=error)
@@ -106,19 +113,22 @@ def register():
             error = "User with email {} already exists. Please check your email or Login in".format(email)
             return render_template("register.html", title="Sign in to VAT", error=error)
         else:
-            user.register(email)
+            session["username"] = email
+            utils.add_user(email)
+            utils.make_annotation_file(email)
             return render_template('profile.html',
                                    title="Annotator's Profile",
-                                   username=user.get_email(),
-                                   num_videos=user.get_total_videos(),
-                                   already_annotated=user.get_annotated())
+                                   username=email,
+                                   num_videos=utils.num_videos(),
+                                   already_annotated=utils.num_annotated(email))
 
     return render_template("register.html", title="Sign Up to VAT", error=error)
 
 
 @app.route('/logout')
 def logout():
-    user.logout()
+    session.pop('username', None)
+    session.pop('video',None)
     return render_template("index.html", title="HOME VAT")
 
 

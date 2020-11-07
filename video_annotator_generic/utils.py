@@ -3,6 +3,7 @@ Helper functions
 """
 import os
 import random
+from datetime import datetime
 from video_annotator_generic.config import VIDEOS, ANNOTATED, USERS, DATABASE
 
 
@@ -167,7 +168,7 @@ def add_annotation(user, video, data) -> None:
         data (int): List of the annotated timestamps for the specific video
     """
     with open(DATABASE, 'a') as f:
-        f.write(user + ',' + video + ',' + data + '\n')
+        f.write(str(datetime.now()) + ',' + user + ','  + video + ',' + data + '\n')
 
 
 def create_directories():
