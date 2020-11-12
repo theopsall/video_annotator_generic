@@ -23,7 +23,7 @@ def home():
 def annotate():
 
     if "username" in session:
-        if utils.get_videos() > utils.annotated(session['username']):
+        if (len(utils.get_videos()) > len(utils.annotated(session['username']))):
             diff = utils.get_difference(session['username'])
             video = utils.get_random_video(diff)
             session['video'] = video
@@ -34,8 +34,12 @@ def annotate():
                                    classes=CLASSES,
                                    filename='Videos' + os.sep + session['video'])
         else:
+            return render_template('profile.html',
+                        title="Annotator's Profile",
+                        username=session["username"],
+                        num_videos=utils.num_videos(),
+                        already_annotated=utils.num_annotated(session["username"]))
 
-            return redirect("/profile")
     else:
         return render_template("index.html", title='Home VAT')
 
